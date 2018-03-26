@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 #=============================================================================
-#  ProjectName: seekplum
+#  ProjectName: identify-captcha
 #     FileName: identify_code
 #         Desc: 训练模型之后测试
 #                1. 从网站动态请求相应的验证文件

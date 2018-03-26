@@ -3,7 +3,7 @@
 
 """
 #=============================================================================
-#  ProjectName: seekplum
+#  ProjectName: identify-captcha
 #     FileName: train_data
 #         Desc: 训练数据
 #       Author: hjd

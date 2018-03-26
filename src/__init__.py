@@ -3,7 +3,7 @@
 
 """
 #=============================================================================
-#  ProjectName: seekplum
+#  ProjectName: identify-captcha
 #     FileName: __init__
 #         Desc:
 #       Author: hjd
