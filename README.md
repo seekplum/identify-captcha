@@ -2,30 +2,17 @@
 
 ---------------------
 
-## 环境
+## 项目环境
 * Ubuntu 16.04/CentOS 6.6
 * Python2.7
 
-## 目录介绍
-```text
-├── LICENSE
-├── packages               # 相关包目录
-│   └── msyh.ttf           # 验证码字体库
-├── README.md
-├── requirements.txt       # 依赖库
-└── src
-│   ├── captcha_code.py    # 生成验证码文件
-│   ├── config.py          # 各种目录等配置文件
-│   ├── identify_code.py   # 训练结束后识别验证码文件
-│   ├── __init__.py
-│   ├── svm_features.py    # 获取图片特征值
-│   ├── train_data.py      # svm训练数据
-│   └── utils.py           # 工具函数
-└── static                 # 静态资源目录
-    └── images             # 图片目录
-        ├── cut-test.png
-        └── qq-group.jpg
-```
+## 安装运行环境
+Pillow 依赖一些系统组件,需要先进行安装
+* Ubuntu
+> sudo apt-get install python-dev
+
+* CentOs
+> sudo yum install libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel
 
 ## 准备步骤
 
@@ -45,7 +32,7 @@
 * 获取测试集的像素特征文件
 * 训练并生成model文件
 
-## 识别验证码
+## 识别验证码流程
 * 获取要识别的验证码图片
 * 降噪的获取二值图
 * 加载SVM模型进行预测
@@ -58,6 +45,32 @@
 
 ## 待解决
 * 验证码进行动态的切割
+* 不同字符形态的特征值收集
+
+## 目录介绍
+```text
+├── build.py               # 编译脚本，构建env
+├── LICENSE
+├── packages               # 相关包目录
+│   ├── libsvm             # libsvm安装包
+│   └── msyh.ttf           # 验证码字体包
+├── Pipfile                # pipenv配置文件
+├── Pipfile.lock           # pipenv版本文件，`不要手动修改`
+├── README.md
+├── requirements.txt       # 依赖库版本文件
+└── src
+│   ├── captcha_code.py    # 生成验证码文件
+│   ├── config.py          # 各种目录等配置文件
+│   ├── identify_code.py   # 训练结束后识别验证码文件
+│   ├── __init__.py
+│   ├── svm_features.py    # 获取图片特征值
+│   ├── train_data.py      # svm训练数据
+│   └── utils.py           # 工具函数
+├── static                 # 静态资源目录
+│   └── images             # 图片目录
+└── tests
+    └── test.py
+```
 
 ## 参考
 * [字符型图片验证码识别完整过程及Python实现](https://www.cnblogs.com/beer/p/5672678.html)
