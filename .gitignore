@@ -103,3 +103,6 @@ ENV/
 
 # Pycharm
 idea/
+
+# 验证码图片
+captcha/
