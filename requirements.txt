@@ -1,0 +1,9 @@
+requests==2.9.1
+
+# ubuntu安装前要先装 python-dev, sudo apt-get install python-dev
+# centos yum install libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel
+Pillow==2.8.1
+
+# 只能通过 github 源码安装, 地址https://github.com/cjlin1/libsvm
+# cp libsvm.so.2 python/svm* /home/hjd/hjd-env/python27/lib/
+libsvm
