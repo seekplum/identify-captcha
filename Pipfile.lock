@@ -1,0 +1,102 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "72608dbe9ce9fc907b2c7fa72c9dd664c704c40ee2ed37214f23861ac08e9147"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "2.7"
+        },
+        "sources": [
+            {
+                "name": "douban",
+                "url": "https://pypi.doubanio.com/simple/",
+                "verify_ssl": false
+            }
+        ]
+    },
+    "default": {
+        "attrs": {
+            "hashes": [
+                "sha256:1c7960ccfd6a005cd9f7ba884e6316b5e430a3f1a6c37c5f87d8b43f83b54ec9",
+                "sha256:a17a9573a6f475c99b551c0e0a812707ddda1ec9653bed04c13841404ed6f450"
+            ],
+            "version": "==17.4.0"
+        },
+        "funcsigs": {
+            "hashes": [
+                "sha256:330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca",
+                "sha256:a7bb0f2cf3a3fd1ab2732cb49eba4252c2af4240442415b4abce3b87022a8f50"
+            ],
+            "markers": "python_version < '3.0'",
+            "version": "==1.0.2"
+        },
+        "more-itertools": {
+            "hashes": [
+                "sha256:0dd8f72eeab0d2c3bd489025bb2f6a1b8342f9b198f6fc37b52d15cfa4531fea",
+                "sha256:11a625025954c20145b37ff6309cd54e39ca94f72f6bb9576d1195db6fa2442e",
+                "sha256:c9ce7eccdcb901a2c75d326ea134e0886abfbea5f93e91cc95de9507c0816c44"
+            ],
+            "version": "==4.1.0"
+        },
+        "pillow": {
+            "hashes": [
+                "sha256:109eaaa9e1c53084e24961bb60b5a61f7398970d0c3c859959b0d029c5208fed",
+                "sha256:2267fbbf8393e298c1b2ce7c397c75e88e8489265153070ec51d956b9ecac8dc",
+                "sha256:2d0440fdc8d725a493771cce488a72cfd452b3b53c6743586f7e92f84984ebc7",
+                "sha256:33857a509bef5024a930858727f394b3474ffd37cf92d6b106509bf8962c5d81",
+                "sha256:38b4d893a446e077886474f953c5aa8dc6f90f47a8da31eff63b16d294d03c00",
+                "sha256:4363b52527c263e77f5b18c3dfffd15ae454edf0c4457197ecbe29863a651938",
+                "sha256:455d04e21451b30b1774a00fe4ea83c74613605540690de63411e75334a80bfd",
+                "sha256:5184fcd235e0c032553cb71a816f2275eec2b8d1e60bf5c7eb42542d8386c2d1",
+                "sha256:540e4cddf981569f2acf1013dec860c793e31babd6bc4ba46e1804403bfc8b36",
+                "sha256:8760c118a0215eba163f7782110e7efcdbb15f8a7321f3f61c5ac0dbbb12c996",
+                "sha256:9776042ede2050cc224db1e139a815a17fc9754a2624ec8853d0afd84366d073",
+                "sha256:a7464b99a107d5e242ae4030edf8fffc050b84a6fc517ab8af09efb763c9bb35",
+                "sha256:c26f0857fdedb23ef08acdb2fdfee15271af717299483cf4ef41f47c604fbda1",
+                "sha256:cdccedfc37e1e4c3d4c9360747d938b8cc2420af8898b6c2629500c179731a1e",
+                "sha256:d15f69a9f3e9d0f2cb439c2834803b9b0649cb38123b9e0a5277cdb1d5997dc1",
+                "sha256:ee8ae884a0418a7147edd8b5540eefb4926c1f8b0caa6785b9a5550bd7055f52"
+            ],
+            "index": "douban",
+            "version": "==2.8.1"
+        },
+        "pluggy": {
+            "hashes": [
+                "sha256:7f8ae7f5bdf75671a718d2daf0a64b7885f74510bcd98b1a0bb420eb9a9d0cff"
+            ],
+            "version": "==0.6.0"
+        },
+        "py": {
+            "hashes": [
+                "sha256:29c9fab495d7528e80ba1e343b958684f4ace687327e6f789a94bf3d1915f881",
+                "sha256:983f77f3331356039fdd792e9220b7b8ee1aa6bd2b25f567a963ff1de5a64f6a"
+            ],
+            "version": "==1.5.3"
+        },
+        "pytest": {
+            "hashes": [
+                "sha256:6266f87ab64692112e5477eba395cfedda53b1933ccd29478e671e73b420c19c",
+                "sha256:fae491d1874f199537fd5872b5e1f0e74a009b979df9d53d1553fd03da1703e1"
+            ],
+            "index": "douban",
+            "version": "==3.5.0"
+        },
+        "requests": {
+            "hashes": [
+                "sha256:113fbba5531a9e34945b7d36b33a084e8ba5d0664b703c81a7c572d91919a5b8",
+                "sha256:c577815dd00f1394203fc44eb979724b098f88264a9ef898ee45b8e5e9cf587f"
+            ],
+            "index": "douban",
+            "version": "==2.9.1"
+        },
+        "six": {
+            "hashes": [
+                "sha256:70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9",
+                "sha256:832dc0e10feb1aa2c68dcc57dbb658f1c7e65b9b61af69048abc87a2db00a0eb"
+            ],
+            "version": "==1.11.0"
+        }
+    },
+    "develop": {}
+}
