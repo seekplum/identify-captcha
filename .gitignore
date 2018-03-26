@@ -106,3 +106,6 @@ ENV/
 
 # 验证码图片
 captcha/
+
+# sphinx
+docs/build/
