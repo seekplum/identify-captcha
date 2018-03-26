@@ -223,6 +223,6 @@ def train():
 
 if __name__ == '__main__':
     create_folder()
+    train()
     test_cut_pic()
     test_svm()
-    train()

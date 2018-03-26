@@ -9,17 +9,22 @@
 ## 目录介绍
 ```text
 ├── LICENSE
-├── msyh.ttf               # 验证码字体库
+├── packages               # 相关包目录
+│   └── msyh.ttf           # 验证码字体库
 ├── README.md
 ├── requirements.txt       # 依赖库
 └── src
-    ├── captcha_code.py    # 生成验证码文件
-    ├── config.py          # 各种目录等配置文件
-    ├── identify_code.py   # 训练结束后识别验证码文件
-    ├── __init__.py
-    ├── svm_features.py    # 获取图片特征值
-    ├── train_data.py      # svm训练数据
-    └── utils.py           # 工具函数
+│   ├── captcha_code.py    # 生成验证码文件
+│   ├── config.py          # 各种目录等配置文件
+│   ├── identify_code.py   # 训练结束后识别验证码文件
+│   ├── __init__.py
+│   ├── svm_features.py    # 获取图片特征值
+│   ├── train_data.py      # svm训练数据
+│   └── utils.py           # 工具函数
+└── static                 # 静态资源目录
+    └── images             # 图片目录
+        ├── cut-test.png
+        └── qq-group.jpg
 ```
 
 ## 准备步骤
@@ -29,6 +34,10 @@
 
 ### 简单测试
 * 测试图片分割是否成功
+
+图片分割示例
+![切割后图片](https://github.com/seekplum/identify-captcha/blob/master/static/images/cut-test.png)
+
 * 测试识别分割后的图片
 
 ### 模型训练
@@ -52,3 +61,11 @@
 
 ## 参考
 * [字符型图片验证码识别完整过程及Python实现](https://www.cnblogs.com/beer/p/5672678.html)
+
+## 后续交流
+
+如果有对相关技术有持续关注的兴趣的同学，欢迎加入QQ群： 592109504
+
+或者手机QQ扫码加入：
+
+![QQ群图片](https://github.com/seekplum/identify-captcha/blob/master/static/images/qq-group.jpg)

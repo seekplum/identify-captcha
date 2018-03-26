@@ -102,7 +102,7 @@ ENV/
 
 
 # Pycharm
-idea/
+.idea
 
 # 验证码图片
 captcha/
