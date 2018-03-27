@@ -14,7 +14,11 @@ name = "pypi"
 requests = "==2.9.1"
 Pillow = "==2.8.1"
 pytest = "==3.5.0"
-sphinx-rtd-theme = "*"
+Sphinx = "==1.7.2"
+sphinx-rtd-theme = "==0.1.9"
 
 [requires]
 python_version = "2.7"
+
+[pipenv]
+keep_outdated = true
