@@ -11,7 +11,7 @@ Pillow 依赖一些系统组件,需要先进行安装
 * Ubuntu
 > sudo apt-get install python-dev
 
-* CentOs
+* CentOS
 > sudo yum install libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel
 
 ## 准备步骤
