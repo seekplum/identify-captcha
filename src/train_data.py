@@ -19,10 +19,10 @@ import uuid
 from multiprocessing import Process
 
 from PIL import Image
+from generate_captcha import gen_captcha_text_image
 from svmutil import svm_read_problem, svm_load_model, svm_predict
 
-from captcha_code import gen_captcha_text_image
-from config import captcha_length
+from config import captcha_length, captcha_xy
 from config import test_feature_file, model_path
 from config import data_root, svm_root
 from config import cut_pic_folder, cut_test_folder, bin_clear_folder, identify_result_folder, origin_pic_folder
@@ -72,7 +72,8 @@ def test_number_svm_model(number):
 def test_cut_pic():
     """测试图片分割
     """
-    text, image_path = gen_captcha_text_image(cut_test_folder, file_name="test", draw_lines=True, draw_points=True)
+    text, image_path = gen_captcha_text_image(cut_test_folder, file_name="test", draw_lines=True, draw_points=True,
+                                              xy=captcha_xy)
     img = Image.open(image_path)
 
     # 获取干净的二值化的图片
@@ -135,7 +136,7 @@ def _mock_image(name):
         os.mkdir(temp_folder)
 
     # 只生成同一数字的验证码，方便造数据
-    gen_captcha_text_image(temp_folder, file_name=uuid.uuid4().hex, chars=name * captcha_length)
+    gen_captcha_text_image(temp_folder, file_name=uuid.uuid4().hex, chars=name * captcha_length, xy=captcha_xy)
 
     # 预处理
     batch_get_all_bin_clear(source_path=temp_folder, bin_path=temp_folder)

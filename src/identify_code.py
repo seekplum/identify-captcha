@@ -21,9 +21,9 @@ import os
 
 from PIL import Image
 from svmutil import svm_predict, svm_load_model
+from generate_captcha import gen_captcha_text_image
 
-from captcha_code import gen_captcha_text_image
-from config import model_path, origin_pic_folder, identify_result_folder
+from config import model_path, origin_pic_folder, identify_result_folder, captcha_xy
 from svm_features import get_feature, convert_feature_to_vector
 from utils import get_clear_bin_image, get_crop_images
 
@@ -35,7 +35,7 @@ def crack_identify_captcha(suffix="png"):
     :type suffix str
     """
     # 生成数字验证码图片
-    text, image_path = gen_captcha_text_image(origin_pic_folder, draw_lines=True, draw_points=True)
+    text, image_path = gen_captcha_text_image(origin_pic_folder, draw_lines=True, draw_points=True, xy=captcha_xy)
     img = Image.open(image_path)
 
     # 降噪的获取二值图

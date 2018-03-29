@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "126281c98e86a0bcc801d68fbc6724b45ad56cf37e2578491d442084daa0dd9b"
+            "sha256": "a46057955476ad169a75ee134c3c4ae3ef6082ca2bce3d62f7e460aadd7a8b71"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -57,6 +57,13 @@
             ],
             "markers": "python_version < '3.0'",
             "version": "==1.0.2"
+        },
+        "generate-captcha": {
+            "hashes": [
+                "sha256:6089293694cd8365d99eaff17388f356445963b44118ca240f3bea7afcccc820"
+            ],
+            "index": "douban",
+            "version": "==0.0.1.1"
         },
         "imagesize": {
             "hashes": [

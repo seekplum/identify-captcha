@@ -16,11 +16,10 @@ import os
 
 curr_path = os.path.dirname(os.path.abspath(__file__))
 
-# 下载验证码网址
-captcha_url = "http://www.xxx.com/device/validate_code"
-
-# 验证码长度
-captcha_length = 4
+# ================================ 验证码参数 ================================
+captcha_xy = (2, -11)  # 验证码参数
+captcha_url = "http://www.xxx.com/device/validate_code"  # 下载验证码网址
+captcha_length = 4  # 验证码长度
 
 # ================================ 所有图片的训练目录 ================================
 # 数据目录
