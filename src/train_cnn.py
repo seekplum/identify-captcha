@@ -17,11 +17,11 @@
 import os
 import uuid
 
-
 import numpy as np
 import tensorflow as tf
 
 from PIL import Image
+import matplotlib.pyplot as plt
 
 from generate_captcha import gen_captcha_text_image
 from generate_captcha import NUMBERS, CAPITAL_LETTERS, LOWERCASE_LETTERS
@@ -318,6 +318,18 @@ def crack_captcha(image):
 
 def train_captcha():
     """训练数据
+
+    :return loss_step_data: 训练次数 y轴信息
+    :rtype loss_step_data list
+
+    :return loss_data: loss次数 x轴信息
+    :rtype loss_data list
+
+    :return accuracy_step_data: 训练次数 y轴信息
+    :rtype accuracy_step_data list
+
+    :return accuracy_data: 识别率 x轴信息
+    :rtype accuracy_data list
     """
     output = crack_captcha_cnn()
     # loss
@@ -334,6 +346,10 @@ def train_captcha():
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     saver = tf.train.Saver()
+    loss_data = []
+    loss_step_data = []
+    accuracy_step_data = []
+    accuracy_data = []
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
 
@@ -342,19 +358,53 @@ def train_captcha():
             batch_x, batch_y = get_next_batch(BATCH_NUMBER)
             _, loss_ = sess.run([optimizer, loss], feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.75})
             print_info("\n\nstep: {}, loss: {}".format(step, loss_))
-
+            loss_data.append(loss_)
+            loss_step_data.append(step)
             # 每固定间隔计算一次准确率
             if step % COUNT_INTERNAL == 0:
                 batch_x_test, batch_y_test = get_next_batch(BATCH_NUMBER)
                 acc = sess.run(accuracy, feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.})
                 print_info("\nstep: {}, acc: {}".format(step, acc))
-
+                accuracy_step_data.append(step)
+                accuracy_data.append(acc)
                 # 如果准确率大于 目标正确率 ,保存模型,完成训练
                 if acc > TARGET_ACCURACY:
                     saver.save(sess, mode_path, global_step=step)
                     break
 
             step += 1
+    return loss_step_data, loss_data, accuracy_step_data, accuracy_data
+
+
+def save_line_chart(loss_step_data, loss_data, accuracy_step_data, accuracy_data):
+    """保存折线图
+
+    :param loss_step_data: 训练次数 y轴信息
+    :type loss_step_data list
+
+    :param loss_data: loss次数 x轴信息
+    :type loss_data list
+
+    :param accuracy_step_data: 训练次数 y轴信息
+    :type accuracy_step_data list
+
+    :param accuracy_data: 识别率 x轴信息
+    :type accuracy_data list
+    """
+    plt.figure()
+    plt.plot(loss_step_data, loss_data, "b--", linewidth=1)  # 设置 x/y轴数据，线的颜色/虚线，线的宽度
+    plt.xlabel("loss")
+    plt.ylabel("step")
+    plt.title("Loss/Step")
+    loss_path = os.path.join(mode_folder, "loss.png")
+    plt.savefig(loss_path)
+    plt.figure()
+    plt.plot(accuracy_step_data, accuracy_data, "b--", linewidth=1)
+    plt.xlabel("accuracy")
+    plt.ylabel("step")
+    plt.title("Accuracy/Step")
+    loss_path = os.path.join(mode_folder, "accuracy.png")
+    plt.savefig(loss_path)
 
 
 def identify_captcha():
@@ -371,6 +421,10 @@ def identify_captcha():
 
 
 if __name__ == '__main__':
+    # 训练数据
     create_folder()
-    train_captcha()
-    identify_captcha()
+    loss_step_data, loss_data, accuracy_step_data, accuracy_data = train_captcha()
+    save_line_chart(loss_step_data, loss_data, accuracy_step_data, accuracy_data)
+
+    # # 预测识别验证码
+    # identify_captcha()
