@@ -23,7 +23,7 @@
     │   ├── identify_code.py  # 训练结束后识别验证码文件
     │   ├── __init__.py
     │   ├── svm_features.py   # 获取图片特征值
-    │   ├── train_data.py     # svm训练数据
+    │   ├── train_svm.py     # svm训练数据
     │   └── utils.py          # 工具函数
     ├── static                 # 静态资源目录
     │   └── images          # 图片目录

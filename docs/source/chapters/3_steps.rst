@@ -5,7 +5,7 @@
 -------------
 创建相关目录
 -------------
-train_data.py
+train_svm.py
 
 .. code-block:: python
 
@@ -18,7 +18,7 @@ train_data.py
 ---------------
 测试图片分割
 ---------------
-train_data.py
+train_svm.py
 
 .. code-block:: python
 
@@ -33,7 +33,7 @@ train_data.py
 ----------------------
 测试识别分割后的图片
 ----------------------
-train_data.py
+train_svm.py
 
 .. code-block:: python
 

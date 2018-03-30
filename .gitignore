@@ -109,3 +109,6 @@ captcha/
 
 # sphinx
 docs/build/
+
+# pytest
+tests/.pytest_cache/

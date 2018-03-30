@@ -51,12 +51,7 @@ Pillow 依赖一些系统组件,需要先进行安装
     source .venv/bin/activate
 
     # 训练数据
-    python src/train_data.py
+    python src/train_svm.py
 
     # 识别验证码
     python src/identify_code.py
-
-* 操作截图
-
-.. image:: /_static/images/build-env.png
-
