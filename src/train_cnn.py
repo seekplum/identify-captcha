@@ -33,7 +33,7 @@ SIZE = (IMAGE_WIDTH, IMAGE_HEIGHT)
 CHAR_SET_LEN = len(NUMBERS + CAPITAL_LETTERS + LOWERCASE_LETTERS)  # 文本转向量
 TARGET_ACCURACY = 0.5  # 目标正确率
 COUNT_INTERNAL = 100  # 计算次数间隔
-BATCH_NUMBER = 30  # 批量生成图片数量
+BATCH_NUMBER = 64  # 批量生成图片数量
 
 X = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT * IMAGE_WIDTH])
 Y = tf.placeholder(tf.float32, [None, MAX_CAPTCHA * CHAR_SET_LEN])
