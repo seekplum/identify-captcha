@@ -50,8 +50,13 @@ Pillow 依赖一些系统组件,需要先进行安装
     # 进入env环境
     source .venv/bin/activate
 
-    # 训练数据
-    python src/train_svm.py
+    # 测试环境是否有问题
+    python tests/test_main.py
 
-    # 识别验证码
-    python src/identify_code.py
+* 构建env环境操作截图
+
+.. image:: /_static/images/build-env.png
+
+* 通过测试截图
+
+.. image:: /_static/images/test-main.png
