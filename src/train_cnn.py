@@ -19,75 +19,35 @@ import uuid
 
 import numpy as np
 import tensorflow as tf
-
-from PIL import Image
 import matplotlib.pyplot as plt
 
+from PIL import Image
 from generate_captcha import gen_captcha_text_image
 from generate_captcha import NUMBERS, CAPITAL_LETTERS, LOWERCASE_LETTERS
 
-IMAGE_HEIGHT = 60  # 验证码高度
-IMAGE_WIDTH = 160  # 验证码宽度
-MAX_CAPTCHA = 4  # 验证码最长4字符; 全部固定为4,可以不固定. 如果验证码长度小于4，用'_'补齐
-SIZE = (IMAGE_WIDTH, IMAGE_HEIGHT)
+from config import IMAGE_HEIGHT, IMAGE_WIDTH, MAX_CAPTCHA, SIZE
+from config import BATCH_NUMBER, COUNT_INTERNAL, TARGET_ACCURACY
+from config import cnn_root, origin_pic_folder, cnn_mode_path
+from exception import CaptchaLengthError, CharSetError
+from utils import print_info
+
 CHAR_SET_LEN = len(NUMBERS + CAPITAL_LETTERS + LOWERCASE_LETTERS)  # 文本转向量
-TARGET_ACCURACY = 0.5  # 目标正确率
-COUNT_INTERNAL = 100  # 计算次数间隔
-BATCH_NUMBER = 64  # 批量生成图片数量
 
 X = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT * IMAGE_WIDTH])
 Y = tf.placeholder(tf.float32, [None, MAX_CAPTCHA * CHAR_SET_LEN])
 keep_prob = tf.placeholder(tf.float32)  # dropout
-
-curr_path = os.path.dirname(os.path.abspath(__file__))
-mode_folder = os.path.join(os.path.dirname(curr_path), "captcha", "cnn_train")
-mode_path = os.path.join(mode_folder, "crack_captcha.model")  # 模型文件路径
-origin_folder = os.path.join(os.path.dirname(curr_path), "captcha", "origin")  # 生成的验证码路径
-
-
-class TrainCnnError(Exception):
-    """cnn训练异常
-    """
-    pass
-
-
-class CaptchaLengthError(TrainCnnError):
-    """验证码长度错误
-    """
-    pass
-
-
-class CharSetError(TrainCnnError):
-    """字符ascii码错误
-    """
-    pass
 
 
 def create_folder():
     """创建目录
     """
     paths = [
-        mode_folder,
-        origin_folder
+        cnn_root,
+        origin_pic_folder
     ]
     for file_path in paths:
         if not os.path.exists(file_path):
             os.makedirs(file_path)
-
-
-def print_info(text, newline=True):
-    """打印信息
-
-    :param text: 打印内容
-    :type text any
-
-    :param newline: 是否换行
-    :type newline bool
-    """
-    if newline:
-        print text
-    else:
-        print text,
 
 
 def convert2gray(image):
@@ -184,7 +144,7 @@ def wrap_gen_captcha_text_and_image():
     :rtype image numpy.ndarray
     :return image 图片二维数组
     """
-    text, file_path = gen_captcha_text_image(origin_folder, size=SIZE, file_name=uuid.uuid4().hex)
+    text, file_path = gen_captcha_text_image(origin_pic_folder, size=SIZE, file_name=uuid.uuid4().hex)
     image = get_image_array(file_path)
     return text, file_path, image
 
@@ -238,7 +198,7 @@ def get_next_batch(batch_size):
 
 
 def crack_captcha_cnn(w_alpha=0.01, b_alpha=0.1):
-    """定义CNN
+    """定义CNN模型
 
     :param w_alpha: 张量系数
     :type w_alpha float
@@ -289,33 +249,6 @@ def crack_captcha_cnn(w_alpha=0.01, b_alpha=0.1):
     return out
 
 
-def crack_captcha(image):
-    """预测验证码内容
-
-    :param image: 图片对象
-    :type image numpy.ndarray
-
-    :return 预测结果
-    :rtype str
-    """
-    output = crack_captcha_cnn()
-
-    saver = tf.train.Saver()
-    with tf.Session() as sess:
-        saver.restore(sess, tf.train.latest_checkpoint(mode_folder))
-
-        predict = tf.argmax(tf.reshape(output, [-1, MAX_CAPTCHA, CHAR_SET_LEN]), 2)
-        text_list = sess.run(predict, feed_dict={X: [image], keep_prob: 1})
-
-        text = text_list[0].tolist()
-        vector = np.zeros(MAX_CAPTCHA * CHAR_SET_LEN)
-        i = 0
-        for n in text:
-            vector[i * CHAR_SET_LEN + n] = 1
-            i += 1
-        return vec2text(vector)
-
-
 def train_captcha():
     """训练数据
 
@@ -346,10 +279,10 @@ def train_captcha():
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     saver = tf.train.Saver()
-    loss_data = []
-    loss_step_data = []
-    accuracy_step_data = []
-    accuracy_data = []
+    loss_result = []
+    loss_step_result = []
+    accuracy_step_result = []
+    accuracy_result = []
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
 
@@ -358,73 +291,61 @@ def train_captcha():
             batch_x, batch_y = get_next_batch(BATCH_NUMBER)
             _, loss_ = sess.run([optimizer, loss], feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.75})
             print_info("\n\nstep: {}, loss: {}".format(step, loss_))
-            loss_data.append(loss_)
-            loss_step_data.append(step)
+            loss_result.append(loss_)
+            loss_step_result.append(step)
             # 每固定间隔计算一次准确率
             if step % COUNT_INTERNAL == 0:
                 batch_x_test, batch_y_test = get_next_batch(BATCH_NUMBER)
                 acc = sess.run(accuracy, feed_dict={X: batch_x_test, Y: batch_y_test, keep_prob: 1.})
                 print_info("\nstep: {}, acc: {}".format(step, acc))
-                accuracy_step_data.append(step)
-                accuracy_data.append(acc)
+                accuracy_step_result.append(step)
+                accuracy_result.append(acc)
                 # 如果准确率大于 目标正确率 ,保存模型,完成训练
                 if acc > TARGET_ACCURACY:
-                    saver.save(sess, mode_path, global_step=step)
+                    saver.save(sess, cnn_mode_path, global_step=step)
                     break
 
             step += 1
-    return loss_step_data, loss_data, accuracy_step_data, accuracy_data
+    return loss_step_result, loss_result, accuracy_step_result, accuracy_result
 
 
-def save_line_chart(loss_step_data, loss_data, accuracy_step_data, accuracy_data):
+def save_line_chart(loss_step, loss, accuracy_step, accuracy):
     """保存折线图
 
-    :param loss_step_data: 训练次数 y轴信息
-    :type loss_step_data list
+    :param loss_step: 训练次数 y轴信息
+    :type loss_step list
 
-    :param loss_data: loss次数 x轴信息
-    :type loss_data list
+    :param loss: loss次数 x轴信息
+    :type loss list
 
-    :param accuracy_step_data: 训练次数 y轴信息
-    :type accuracy_step_data list
+    :param accuracy_step: 训练次数 y轴信息
+    :type accuracy_step list
 
-    :param accuracy_data: 识别率 x轴信息
-    :type accuracy_data list
+    :param accuracy: 识别率 x轴信息
+    :type accuracy list
     """
     plt.figure()
-    plt.plot(loss_step_data, loss_data, "b--", linewidth=1)  # 设置 x/y轴数据，线的颜色/虚线，线的宽度
+    plt.plot(loss_step, loss, "b--", linewidth=1)  # 设置 x/y轴数据，线的颜色/虚线，线的宽度
     plt.xlabel("loss")
     plt.ylabel("step")
     plt.title("Loss/Step")
-    loss_path = os.path.join(mode_folder, "loss.png")
+    loss_path = os.path.join(cnn_root, "loss.png")
     plt.savefig(loss_path)
     plt.figure()
-    plt.plot(accuracy_step_data, accuracy_data, "b--", linewidth=1)
+    plt.plot(accuracy_step, accuracy, "b--", linewidth=1)
     plt.xlabel("accuracy")
     plt.ylabel("step")
     plt.title("Accuracy/Step")
-    loss_path = os.path.join(mode_folder, "accuracy.png")
+    loss_path = os.path.join(cnn_root, "accuracy.png")
     plt.savefig(loss_path)
 
 
-def identify_captcha():
-    """识别验证码
-    """
-    text, _, image = wrap_gen_captcha_text_and_image()
-
-    # 二值化
-    image = convert2gray(image)
-    image = image.flatten() / 255
-
-    predict_text = crack_captcha(image)
-    print_info("text: {}  crack: {}".format(text, predict_text))
-
-
 if __name__ == '__main__':
-    # 训练数据
+    # 创建相关目录
     create_folder()
-    loss_step_data, loss_data, accuracy_step_data, accuracy_data = train_captcha()
-    save_line_chart(loss_step_data, loss_data, accuracy_step_data, accuracy_data)
 
-    # # 预测识别验证码
-    # identify_captcha()
+    # 训练数据
+    loss_step_data, loss_data, accuracy_step_data, accuracy_data = train_captcha()
+
+    # 保存训练次数和识别率折线图
+    save_line_chart(loss_step_data, loss_data, accuracy_step_data, accuracy_data)

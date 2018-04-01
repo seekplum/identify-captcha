@@ -18,7 +18,7 @@ from threading import Thread, Lock
 
 import numpy as np
 
-from train_cnn import text2vec, origin_folder, convert2gray, get_image_array
+from train_cnn import text2vec, origin_pic_folder, convert2gray, get_image_array
 from train_cnn import IMAGE_HEIGHT, IMAGE_WIDTH, CHAR_SET_LEN, MAX_CAPTCHA
 
 
@@ -31,13 +31,13 @@ def get_next_batch():
     :return batch_y
     :rtype batch_y numpy.ndarray
     """
-    origin_files = os.listdir(origin_folder)
+    origin_files = os.listdir(origin_pic_folder)
     batch_size = len(origin_files)
     batch_x = np.zeros([batch_size, IMAGE_HEIGHT * IMAGE_WIDTH])
     batch_y = np.zeros([batch_size, MAX_CAPTCHA * CHAR_SET_LEN])
     for i, file_name in enumerate(origin_files):
         text = file_name.rsplit(".", 1)[0]
-        file_path = os.path.join(origin_folder, file_name)
+        file_path = os.path.join(origin_pic_folder, file_name)
         image = get_image_array(file_path)
         image = convert2gray(image)
 
@@ -66,7 +66,7 @@ def get_image_text_vector(batch_x, batch_y, index, file_name, lock):
     """
 
     text = file_name.rsplit(".", 1)[0]
-    file_path = os.path.join(origin_folder, file_name)
+    file_path = os.path.join(origin_pic_folder, file_name)
 
     image = get_image_array(file_path)
     image = convert2gray(image)
@@ -85,7 +85,7 @@ def get_next_batch_thread():
     :return batch_y
     :rtype batch_y numpy.ndarray
     """
-    origin_files = os.listdir(origin_folder)
+    origin_files = os.listdir(origin_pic_folder)
     batch_size = len(origin_files)
     batch_x = np.zeros([batch_size, IMAGE_HEIGHT * IMAGE_WIDTH])
     batch_y = np.zeros([batch_size, MAX_CAPTCHA * CHAR_SET_LEN])

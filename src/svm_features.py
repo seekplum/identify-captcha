@@ -16,7 +16,7 @@ from PIL import Image
 from svmutil import svm_read_problem, svm_save_model
 from svmutil import svm_train
 
-from config import train_file_name, cut_pic_folder, model_path
+from config import train_file_name, cut_pic_folder, svm_model_path
 
 
 def get_feature(img):
@@ -135,4 +135,4 @@ def train_svm_model():
     """
     y, x = svm_read_problem(train_file_name)
     model = svm_train(y, x)
-    svm_save_model(model_path, model)
+    svm_save_model(svm_model_path, model)

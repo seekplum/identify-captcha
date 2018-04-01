@@ -23,7 +23,7 @@ from PIL import Image
 from svmutil import svm_predict, svm_load_model
 from generate_captcha import gen_captcha_text_image
 
-from config import model_path, origin_pic_folder, identify_result_folder, captcha_xy
+from config import svm_model_path, origin_pic_folder, identify_result_folder, captcha_xy
 from svm_features import get_feature, convert_feature_to_vector
 from utils import get_clear_bin_image, get_crop_images
 
@@ -44,7 +44,7 @@ def crack_identify_captcha(suffix="png"):
     child_img_list = get_crop_images(bin_img)
 
     # 加载SVM模型进行预测
-    model = svm_load_model(model_path)
+    model = svm_load_model(svm_model_path)
 
     img_ocr_names = []
     for index, child_img in enumerate(child_img_list):

@@ -18,16 +18,14 @@ import uuid
 
 from multiprocessing import Process
 
-from PIL import Image
 from generate_captcha import gen_captcha_text_image
 from svmutil import svm_read_problem, svm_load_model, svm_predict
 
 from config import captcha_length, captcha_xy
-from config import test_feature_file, model_path
+from config import test_feature_file, svm_model_path
 from config import data_root, svm_root
 from config import cut_pic_folder, cut_test_folder, bin_clear_folder, identify_result_folder, origin_pic_folder
 from svm_features import get_svm_train_txt, convert_images_to_feature_file, train_svm_model
-from utils import get_clear_bin_image, get_crop_images, generate_alias_name
 from utils import batch_get_all_bin_clear, batch_cut_images
 
 
@@ -59,7 +57,7 @@ def test_number_svm_model(number):
     yt, xt = svm_read_problem(feature_file)
     print "yt: {}".format(yt)
 
-    model = svm_load_model(model_path)
+    model = svm_load_model(svm_model_path)
     p_label, p_acc, p_val = svm_predict(yt, xt, model)
 
     for cnt, item in enumerate(p_label):
@@ -67,26 +65,6 @@ def test_number_svm_model(number):
         # 每十个打印一行
         if cnt % 10 == 0:
             print
-
-
-def test_cut_pic():
-    """测试图片分割
-    """
-    text, image_path = gen_captcha_text_image(cut_test_folder, file_name="test", draw_lines=True, draw_points=True,
-                                              xy=captcha_xy)
-    img = Image.open(image_path)
-
-    # 获取干净的二值化的图片
-    img = get_clear_bin_image(img)
-    new_image_path = generate_alias_name(image_path, "_bin")
-    img.save(new_image_path)
-
-    child_img_list = get_crop_images(img)
-
-    for index, child_img in enumerate(child_img_list):
-        file_name = "cur-{}.png".format(index)
-        file_path = os.path.join(cut_test_folder, file_name)
-        child_img.save(file_path)
 
 
 def test_svm():
@@ -225,5 +203,4 @@ def train():
 if __name__ == '__main__':
     create_folder()
     train()
-    test_cut_pic()
     test_svm()

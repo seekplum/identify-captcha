@@ -52,7 +52,17 @@ train_file_name = os.path.join(svm_root, "train_pix_feature_xy.txt")
 test_feature_file = os.path.join(svm_root, "last_test_pix_xy_{}.txt")
 
 # 训练完毕后，保存的SVM模型参数文件
-model_path = os.path.join(svm_root, "svm_model_file")
+svm_model_path = os.path.join(svm_root, "svm_model_file")
 
-# ================================ 字体 ================================
-monaco_ttf = os.path.join(curr_path, "msyh.ttf")
+# ================================ cnn训练相关路径 ================================
+
+IMAGE_HEIGHT = 60  # 验证码高度
+IMAGE_WIDTH = 160  # 验证码宽度
+MAX_CAPTCHA = 4  # 验证码最长4字符; 全部固定为4,可以不固定. 如果验证码长度小于4，用'_'补齐
+SIZE = (IMAGE_WIDTH, IMAGE_HEIGHT)
+TARGET_ACCURACY = 0.1  # 目标正确率
+COUNT_INTERNAL = 10  # 计算次数间隔
+BATCH_NUMBER = 64  # 每次批量生成图片数量
+
+cnn_root = os.path.join(data_root, "cnn_train")
+cnn_mode_path = os.path.join(cnn_root, "crack_captcha.model")  # 模型文件路径

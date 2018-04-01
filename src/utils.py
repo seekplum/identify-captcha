@@ -21,6 +21,21 @@ from PIL import Image
 from config import captcha_url, captcha_length
 
 
+def print_info(text, newline=True):
+    """打印信息
+
+    :param text: 打印内容
+    :type text any
+
+    :param newline: 是否换行
+    :type newline bool
+    """
+    if newline:
+        print text
+    else:
+        print text,
+
+
 def download_captcha(number, image_path, suffix="png"):
     """下载验证码图片
 
@@ -309,7 +324,7 @@ def save_crop_images(bin_clear_image_path, child_img_list, cut_path):
         child_img.save(os.path.join(cut_path, cut_img_file_name))
 
 
-# ================================== 训练素材准备 ==================================
+# ================================== svm 训练素材准备 ==================================
 
 def batch_get_all_bin_clear(source_path, bin_path):
     """获取所有去噪声的二值图片
