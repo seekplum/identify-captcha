@@ -22,7 +22,7 @@ from common import get_next_batch, get_next_batch_thread
 from config import SIZE, origin_pic_folder
 from train_cnn import text2vec, vec2text, print_info
 
-CAPTCHA_COUNT = 30
+CAPTCHA_COUNT = 20
 
 
 @pytest.mark.parametrize("text", [

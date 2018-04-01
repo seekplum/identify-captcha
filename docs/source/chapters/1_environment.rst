@@ -32,6 +32,11 @@ Pillow 依赖一些系统组件,需要先进行安装
     sudo yum install libtiff-devel libjpeg-devel libzip-devel freetype-devel lcms2-devel libwebp-devel tcl-devel tk-devel
 
 -----------
+验证码字体库
+-----------
+若不指定字体类型，则需要保证系统中有 `/usr/share/fonts/msyh.ttf <https://github.com/seekplum/generate_captcha/blob/master/generate_captcha/msyh.ttf>`_ 这个字体库
+
+-----------
 构建env环境
 -----------
 * 操作步骤

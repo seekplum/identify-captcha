@@ -26,3 +26,5 @@ https://github.com/seekplum/identify-captcha
 `字符型图片验证码识别完整过程及Python实现 <https://www.cnblogs.com/beer/p/5672678.html>`_
 
 `Python验证码识别 <http://www.cnblogs.com/qqandfqr/p/7866650.html>`_
+
+`TensorFlow练习20: 使用深度学习破解字符验证码 – WTF Daily Blog <http://blog.topspeedsnail.com/archives/10858>`_
