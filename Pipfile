@@ -19,6 +19,7 @@ sphinx-rtd-theme = "==0.1.9"
 generate-captcha = "==0.0.3"
 tensorflow = "==1.6.0"
 matplotlib = "==2.2.2"
+pytesseract = "==0.2.0"
 
 [requires]
 python_version = "2.7"

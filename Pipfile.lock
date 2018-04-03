@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ad6e33c9cc9b470b525256b987f4374961960c823436afbfd3ab9c772ef70c78"
+            "sha256": "3288f553e04c3006f2397b0374c007def36cd995c3e1708228a27b1145cea7a9"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -293,10 +293,10 @@
         },
         "pbr": {
             "hashes": [
-                "sha256:8b9a7c3704657cb0831b3ded0a6b61377947c8235b76649bb7de4bfe2e6cfa56",
-                "sha256:cf66675e22ae91a4f20e4b8354f117d3e3d1de651513051d109cc39645fb3672"
+                "sha256:56b7a8ba7d64bf6135a9dfefb85a80d95924b3fde5ed6343a1a1d464a040dae3",
+                "sha256:de75cf1d510542c746beeff66b52241eb12c8f95f2ef846ee50ed5d72392caa4"
             ],
-            "version": "==4.0.0"
+            "version": "==4.0.1"
         },
         "pillow": {
             "hashes": [
@@ -371,6 +371,13 @@
                 "sha256:fee43f17a9c4087e7ed1605bd6df994c6173c1e977d7ade7b651292fab2bd010"
             ],
             "version": "==2.2.0"
+        },
+        "pytesseract": {
+            "hashes": [
+                "sha256:35035b0a69a789224d1e981d95453d644c95f8bf869372787f2164b9872d597f"
+            ],
+            "index": "douban",
+            "version": "==0.2.0"
         },
         "pytest": {
             "hashes": [
@@ -497,11 +504,11 @@
         },
         "wheel": {
             "hashes": [
-                "sha256:9515fe0a94e823fd90b08d22de45d7bde57c90edce705b22f5e1ecf7e1b653c8",
-                "sha256:e721e53864f084f956f40f96124a74da0631ac13fbbd1ba99e8e2b5e9cafdf64"
+                "sha256:1ae8153bed701cb062913b72429bcf854ba824f973735427681882a688cb55ce",
+                "sha256:9cdc8ab2cc9c3c2e2727a4b67c22881dbb0e1c503d592992594c5e131c867107"
             ],
             "markers": "python_version < '3'",
-            "version": "==0.30.0"
+            "version": "==0.31.0"
         }
     },
     "develop": {}
