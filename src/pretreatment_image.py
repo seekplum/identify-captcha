@@ -28,7 +28,7 @@ class PixelError(Exception):
     pass
 
 
-def generate_alias_name(file_path, suffix, separator="."):
+def generate_alias_path(file_path, suffix, separator="."):
     """生成别名，保留后缀格式不变
 
     :param file_path: str 文件全路径
@@ -41,10 +41,26 @@ def generate_alias_name(file_path, suffix, separator="."):
     """
     parent_directory = os.path.dirname(file_path)
     # 获取文件名和类型
-    file_name, file_type = os.path.basename(file_path).rsplit(separator, 1)
+    file_name = os.path.basename(file_path)
     # 生成新的文件路径
-    new_path = os.path.join(parent_directory, "{}{}{}{}".format(file_name, suffix, separator, file_type))
-    return new_path
+    return os.path.join(parent_directory, generate_alias_name(file_name, suffix, separator))
+
+
+def generate_alias_name(file_name, suffix, separator="."):
+    """生成别名，保留后缀格式不变
+
+    :param file_name: str 文件全路径
+    :param suffix: str 要增加的后缀
+    :param separator: str 分隔符，默认为 `.`
+
+    :return: 生成后的文件名
+
+    :raise ValueError 分割符不在文件名中
+    """
+    # 获取文件名和类型
+    file_name, file_type = file_name.rsplit(separator, 1)
+    # 生成新的文件名
+    return "{}{}{}{}".format(file_name, suffix, separator, file_type)
 
 
 def identify_code(image_path):
@@ -67,7 +83,7 @@ class Pretreatment(object):
     """预处理验证码图片
     """
 
-    def __init__(self, image_path, is_save=False):
+    def __init__(self, image_path, is_save=False, save_folder=None):
         """初始化属性
 
         :param image_path: 验证码图片路径
@@ -75,19 +91,25 @@ class Pretreatment(object):
 
         :param is_save: 是否需要保存图片
         :type is_save bool
+
+        :param save_folder: 保存图片目录
+        :type save_folder str
         """
         self.image_path = image_path
+        self.image_name = os.path.basename(self.image_path)
         self.is_save = is_save
+        self.save_folder = save_folder
 
         self.cut_paths = set()  # 切割后路径
         self.numpy_img = None  # numpy.array 图片对象
         self.image_img = None  # PIL.Image 图片对象
 
-        self.binary_image_path = generate_alias_name(self.image_path, "_binary")
-        self.static_image_path = generate_alias_name(self.image_path, "_static")
-        self.border_image_path = generate_alias_name(self.image_path, "_border")
-        self.line_image_path = generate_alias_name(self.image_path, "_line")
-        self.point_image_path = generate_alias_name(self.image_path, "_point")
+        self.binary_image_name = generate_alias_name(self.image_name, "_binary")
+        self.static_image_name = generate_alias_name(self.image_name, "_static")
+        self.threshold_image_name = generate_alias_name(self.image_name, "_threshold")
+        self.border_image_name = generate_alias_name(self.image_name, "_border")
+        self.line_image_name = generate_alias_name(self.image_name, "_line")
+        self.point_image_name = generate_alias_name(self.image_name, "_point")
 
     def _get_threshold(self):
         """查询背景色阀值
@@ -100,25 +122,40 @@ class Pretreatment(object):
         image_counts = Counter(image_data)
 
         # 频率出现最高的认为是背景色
-        threshold = image_counts.most_common(1)[0][0]
+        # 第二高的为验证码颜色
+        threshold = image_counts.most_common(2)[0][0]
         return threshold
 
-    def _save_image(self, image_path, image_obj=None, is_numpy_img=True):
+    def _save_image(self, image_name, image_obj=None, is_numpy_img=True):
         """保存图片
 
-        :param image_path: 需要保存的图片路径
-        :type image_path str
+        :param image_name: 需要保存的图片名字
+        :type image_name str
 
         :param is_numpy_img: 是否是numpy图片对象
         :type is_numpy_img bool
+
+        :return image_path 保存后的图片路径
+        :rtype image_path str
         """
+        # 是否需要保存
         if self.is_save:
+            # 图片对象类型
             if image_obj is None:
                 image_obj = self.numpy_img
+
+            # 获取保存路径
+            if self.save_folder:
+                save_folder = self.save_folder
+            else:
+                save_folder = os.path.dirname(self.image_path)
+            image_path = os.path.join(save_folder, image_name)
+            # 保存图片
             if is_numpy_img:
                 cv2.imwrite(image_path, image_obj)
             else:
                 self.image_img.save(image_path)
+            return image_path
 
     def _get_dynamic_binary_image(self):
         """自适应阀值二值化
@@ -128,12 +165,12 @@ class Pretreatment(object):
     　　 二值化，是将图片处理为只有黑白两色的图片，利于后面的图像处理和识别
         """
         # 生成新的图片，不影响原来的文件
-        self.binary_image_path = generate_alias_name(self.image_path, suffix="_binary")
+        self.binary_image_name = generate_alias_name(self.image_path, suffix="_binary")
         img = cv2.imread(self.image_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # 灰值化
         # 二值化
         self.numpy_img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 1)
-        self._save_image(self.binary_image_path)
+        self._save_image(self.binary_image_name)
 
     def _get_static_binary_image(self, threshold=None):
         """手动二值化
@@ -151,10 +188,10 @@ class Pretreatment(object):
         width, height = img.size
         for y in range(height):
             for x in range(width):
-                if pix_data[x, y] < threshold:
-                    pix_data[x, y] = 0
+                if pix_data[x, y] == threshold:
+                    pix_data[x, y] = 255  # 黑色
                 else:
-                    pix_data[x, y] = 255
+                    pix_data[x, y] = 0  # 白色
 
         image = Image.new("1", img.size)
         draw = ImageDraw.Draw(image)
@@ -163,7 +200,73 @@ class Pretreatment(object):
             for y in xrange(0, height):
                 draw.point((x, y), pix_data[(x, y)])
         self.image_img = image
-        self._save_image(self.static_image_path, is_numpy_img=False)
+        self.image_path = self._save_image(self.static_image_name, is_numpy_img=False)
+
+    @classmethod
+    def get_static_binary_image(cls, image_path, new_image_path, threshold=150, dot_count=3):
+        """降噪
+
+        根据一个点A的RGB值，与周围的8个点的RBG值比较，设定一个值  dot_count (0 < dot_count <8)
+        当检查点的RGB值与周围8个点的RGB相等数小于 dot_count 时，此点为噪点
+
+        :param image_path 要识别的图片路径
+        :type image_path str
+
+        :param new_image_path 处理后的图片路径
+        :type new_image_path str
+
+        :param threshold RGB阀值,小于该值认为时字符内容
+        :type threshold int
+
+        :param dot_count 与周围点相等数量,小于该值认为是噪点
+        :type dot_count str
+        """
+        pix_data = {}
+        img = Image.open(image_path)
+        image_img = img.convert('L')
+        width, height = image_img.size
+        for y in xrange(0, height):
+            for x in xrange(0, width):
+                if image_img.getpixel((x, y)) > threshold:
+                    pix_data[(x, y)] = 1
+                else:
+                    pix_data[(x, y)] = 0
+
+        pix_data[(0, 0)] = 1
+        pix_data[(width - 1, height - 1)] = 1
+
+        for x in xrange(1, width - 1):
+            for y in xrange(1, height - 1):
+                near_dot = 0
+                curr_dot = pix_data[(x, y)]
+                if curr_dot == pix_data[(x - 1, y - 1)]:
+                    near_dot += 1
+                if curr_dot == pix_data[(x - 1, y)]:
+                    near_dot += 1
+                if curr_dot == pix_data[(x - 1, y + 1)]:
+                    near_dot += 1
+                if curr_dot == pix_data[(x, y - 1)]:
+                    near_dot += 1
+                if curr_dot == pix_data[(x, y + 1)]:
+                    near_dot += 1
+                if curr_dot == pix_data[(x + 1, y - 1)]:
+                    near_dot += 1
+                if curr_dot == pix_data[(x + 1, y)]:
+                    near_dot += 1
+                if curr_dot == pix_data[(x + 1, y + 1)]:
+                    near_dot += 1
+
+                if near_dot < dot_count:  # 确定是噪声
+                    pix_data[(x, y)] = 1
+
+        image_img = Image.new("1", image_img.size)
+        draw = ImageDraw.Draw(image_img)
+
+        for x in xrange(0, width):
+            for y in xrange(0, height):
+                draw.point((x, y), pix_data[(x, y)])
+
+        image_img.save(new_image_path)
 
     def _clear_border(self):
         """去除边框
@@ -181,7 +284,7 @@ class Pretreatment(object):
                 # if x == 0 or x == width - 1 or x == width - 2:
                 if x < 4 or x > height - 4:
                     self.numpy_img[x, y] = 255
-        self._save_image(self.border_image_path)
+        self._save_image(self.border_image_name)
 
     def _interference_line(self):
         """降噪去除干扰线
@@ -205,7 +308,7 @@ class Pretreatment(object):
                     count += 1
                 if count > 2:
                     self.numpy_img[x, y] = 255
-        self._save_image(self.line_image_path)
+        self._save_image(self.line_image_name)
 
     def _interference_point(self, x=0, y=0):
         """降噪去除干扰点
@@ -306,7 +409,7 @@ class Pretreatment(object):
                                  + int(self.numpy_img[x + 1, y + 1])
                         if number <= 4 * 245:
                             self.numpy_img[x, y] = 0
-        self._save_image(self.point_image_path)
+        self._save_image(self.point_image_name)
 
     def _detect_block_point(self, x_max):
         """搜索区块起点
@@ -465,10 +568,10 @@ class Pretreatment(object):
             img_end_y = img_position[2][i][1] + y_offset
             cropped = self.numpy_img[img_start_y:img_end_y, img_start_x:img_end_x]
 
-            new_image_path = generate_alias_name(self.image_path, suffix="cut_{}".format(i))
-            self._save_image(new_image_path, image_obj=cropped)
+            new_image_name = generate_alias_name(self.image_path, suffix="cut_{}".format(i))
+            self._save_image(new_image_name, image_obj=cropped)
 
-            self.cut_paths.add(new_image_path)
+            self.cut_paths.add(new_image_name)
 
     def prepare(self):
         """预处理
@@ -479,9 +582,9 @@ class Pretreatment(object):
         4. 对图片进行点降噪
         5. 对字符进行切割
         """
-        self._get_dynamic_binary_image()
         self._get_static_binary_image()
-        self._clear_border()
+        self._get_dynamic_binary_image()
+        # self._clear_border()
         self._interference_line()
         self._interference_point()
         self._cutting_img()
@@ -490,7 +593,9 @@ class Pretreatment(object):
 
 def test():
     test_image_path = "/home/hjd/PycharmProjects/identify-captcha/static/images/test.png"
-    manager = Pretreatment(test_image_path, is_save=True)
+    new_test_image_path = "/home/hjd/PycharmProjects/identify-captcha/static/images/test2.png"
+    Pretreatment.get_static_binary_image(test_image_path, new_test_image_path)
+    manager = Pretreatment(new_test_image_path, is_save=True)
     paths = manager.prepare()
     for image_path in paths:
         text = identify_code(image_path)
