@@ -111,21 +111,6 @@ class Pretreatment(object):
         self.line_image_name = generate_alias_name(self.image_name, "_line")
         self.point_image_name = generate_alias_name(self.image_name, "_point")
 
-    def _get_threshold(self):
-        """查询背景色阀值
-        """
-        img = Image.open(self.image_path)
-        img = img.convert('L')
-        pix_data = img.load()
-        width, height = img.size
-        image_data = [pix_data[x, y] for y in range(height) for x in range(width)]
-        image_counts = Counter(image_data)
-
-        # 频率出现最高的认为是背景色
-        # 第二高的为验证码颜色
-        threshold = image_counts.most_common(2)[0][0]
-        return threshold
-
     def _save_image(self, image_name, image_obj=None, is_numpy_img=True):
         """保存图片
 
@@ -172,26 +157,47 @@ class Pretreatment(object):
         self.numpy_img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 1)
         self._save_image(self.binary_image_name)
 
-    def _get_static_binary_image(self, threshold=None):
+    def _get_threshold(self):
+        """查询背景色阀值
+        """
+        img = Image.open(self.image_path)
+        img = img.convert('L')
+        pix_data = img.load()
+        width, height = img.size
+        image_data = [pix_data[x, y] for y in range(height) for x in range(width)]
+        image_counts = Counter(image_data)
+        most_common = image_counts.most_common(5)
+        # 频率出现最高的认为是背景色
+        # 第二到第五 高的为验证码颜色
+        thresholds = [item[0] for item in most_common[1:]]
+        return thresholds
+
+    def _get_static_binary_image(self):
         """手动二值化
 
         1. 对于超过阀值的设置成白色,文字部分设置黑色
         2. 重新保存图片
-
-        :param threshold: int 阀值
         """
-        if threshold is None:
-            threshold = self._get_threshold()
+
+        def check_dot():
+            result = True
+            # if pix_data[x, y] > 140:
+            # if pix_data[x, y] in thresholds:
+            if any([abs(pix_data[x, y] - th) < 5 for th in thresholds]):
+                result = False
+            return result
+
+        thresholds = self._get_threshold()
         img = Image.open(self.image_path)
         img = img.convert('L')
         pix_data = img.load()
         width, height = img.size
         for y in range(height):
             for x in range(width):
-                if pix_data[x, y] == threshold:
-                    pix_data[x, y] = 255  # 黑色
+                if check_dot():
+                    pix_data[x, y] = 255  # 白色
                 else:
-                    pix_data[x, y] = 0  # 白色
+                    pix_data[x, y] = 0  # 黑色
 
         image = Image.new("1", img.size)
         draw = ImageDraw.Draw(image)
