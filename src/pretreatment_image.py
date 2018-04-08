@@ -43,7 +43,8 @@ def generate_alias_path(file_path, suffix, separator="."):
     # 获取文件名和类型
     file_name = os.path.basename(file_path)
     # 生成新的文件路径
-    return os.path.join(parent_directory, generate_alias_name(file_name, suffix, separator))
+    return os.path.join(parent_directory,
+                        generate_alias_name(file_name, suffix, separator))
 
 
 def generate_alias_name(file_name, suffix, separator="."):
@@ -75,7 +76,8 @@ def identify_code(image_path):
     :return 图片中的文字
     """
     # 识别字符, # 单个字符是10，一行文本是7
-    img_text = pytesseract.image_to_string(Image.open(image_path), lang='eng', config='-psm 10')
+    img_text = pytesseract.image_to_string(Image.open(image_path), lang='eng',
+                                           config='-psm 10')
     return img_text
 
 
@@ -83,7 +85,8 @@ class Pretreatment(object):
     """预处理验证码图片
     """
 
-    def __init__(self, image_path, is_save=False, save_folder=None):
+    def __init__(self, image_path, is_save=False, save_folder=None,
+                 color_type=1, color_deviation=5):
         """初始化属性
 
         :param image_path: 验证码图片路径
@@ -94,22 +97,23 @@ class Pretreatment(object):
 
         :param save_folder: 保存图片目录
         :type save_folder str
+
+        :param color_type 字符的颜色种类
+        :type color_type int
+
+        :param color_deviation 字符颜色偏差
+        :type color_deviation int
         """
         self.image_path = image_path
         self.image_name = os.path.basename(self.image_path)
         self.is_save = is_save
         self.save_folder = save_folder
+        self.color_type = color_type
+        self.color_deviation = color_deviation
 
         self.cut_paths = set()  # 切割后路径
         self.numpy_img = None  # numpy.array 图片对象
         self.image_img = None  # PIL.Image 图片对象
-
-        self.binary_image_name = generate_alias_name(self.image_name, "_binary")
-        self.static_image_name = generate_alias_name(self.image_name, "_static")
-        self.threshold_image_name = generate_alias_name(self.image_name, "_threshold")
-        self.border_image_name = generate_alias_name(self.image_name, "_border")
-        self.line_image_name = generate_alias_name(self.image_name, "_line")
-        self.point_image_name = generate_alias_name(self.image_name, "_point")
 
     def _save_image(self, image_name, image_obj=None, is_numpy_img=True):
         """保存图片
@@ -149,24 +153,25 @@ class Pretreatment(object):
 
     　　 二值化，是将图片处理为只有黑白两色的图片，利于后面的图像处理和识别
         """
-        # 生成新的图片，不影响原来的文件
-        self.binary_image_name = generate_alias_name(self.image_path, suffix="_binary")
         img = cv2.imread(self.image_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # 灰值化
         # 二值化
-        self.numpy_img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 1)
-        self._save_image(self.binary_image_name)
+        self.numpy_img = cv2.adaptiveThreshold(img, 255,
+                                               cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                               cv2.THRESH_BINARY, 21, 1)
+        self._save_image(generate_alias_name(self.image_name, "_binary"))
 
     def _get_threshold(self):
         """查询背景色阀值
         """
         img = Image.open(self.image_path)
-        img = img.convert('L')
+        # img = img.convert('L')
         pix_data = img.load()
         width, height = img.size
-        image_data = [pix_data[x, y] for y in range(height) for x in range(width)]
+        image_data = [pix_data[x, y] for y in range(height) for x in
+                      range(width)]
         image_counts = Counter(image_data)
-        most_common = image_counts.most_common(5)
+        most_common = image_counts.most_common(self.color_type + 1)
         # 频率出现最高的认为是背景色
         # 第二到第五 高的为验证码颜色
         thresholds = [item[0] for item in most_common[1:]]
@@ -179,37 +184,47 @@ class Pretreatment(object):
         2. 重新保存图片
         """
 
-        def check_dot():
+        def check_dot_turn_white():
+            """检查该点是否需要转成白色
+            """
             result = True
-            # if pix_data[x, y] > 140:
-            # if pix_data[x, y] in thresholds:
-            if any([abs(pix_data[x, y] - th) < 5 for th in thresholds]):
-                result = False
+            for item in thresholds:
+                if all([abs(item[i] - pix_data[x, y][i]) < self.color_deviation
+                        for i in range(len(pix_data[x, y]))]):
+                    result = False
+                    break
             return result
 
         thresholds = self._get_threshold()
         img = Image.open(self.image_path)
-        img = img.convert('L')
+        # img = img.convert('L')
         pix_data = img.load()
         width, height = img.size
         for y in range(height):
             for x in range(width):
-                if check_dot():
-                    pix_data[x, y] = 255  # 白色
-                else:
-                    pix_data[x, y] = 0  # 黑色
-
-        image = Image.new("1", img.size)
-        draw = ImageDraw.Draw(image)
-
-        for x in xrange(0, width):
-            for y in xrange(0, height):
-                draw.point((x, y), pix_data[(x, y)])
-        self.image_img = image
-        self.image_path = self._save_image(self.static_image_name, is_numpy_img=False)
+                if check_dot_turn_white():
+                    pix_data[x, y] = (255, 255, 255, 255)  # 白色
+                    # pix_data[x, y] = 255  # 白色
+                    # else:
+                    # pix_data[x, y] = 0  # 黑色
+        self.image_img = img
+        self.image_path = self._save_image(generate_alias_name(self.image_name,
+                                                               "_static"),
+                                           is_numpy_img=False)
+        # image = Image.new("1", img.size)
+        # draw = ImageDraw.Draw(image)
+        #
+        # for x in xrange(0, width):
+        #     for y in xrange(0, height):
+        #         draw.point((x, y), pix_data[(x, y)])
+        # self.image_img = image
+        # self.image_path = self._save_image(
+        #     generate_alias_name(self.image_name, "_static"),
+        #     is_numpy_img=False)
 
     @classmethod
-    def get_static_binary_image(cls, image_path, new_image_path, threshold=150, dot_count=3):
+    def get_static_binary_image(cls, image_path, new_image_path, threshold=150,
+                                dot_count=3):
         """降噪
 
         根据一个点A的RGB值，与周围的8个点的RBG值比较，设定一个值  dot_count (0 < dot_count <8)
@@ -225,7 +240,7 @@ class Pretreatment(object):
         :type threshold int
 
         :param dot_count 与周围点相等数量,小于该值认为是噪点
-        :type dot_count str
+        :type dot_count int
         """
         pix_data = {}
         img = Image.open(image_path)
@@ -290,7 +305,7 @@ class Pretreatment(object):
                 # if x == 0 or x == width - 1 or x == width - 2:
                 if x < 4 or x > height - 4:
                     self.numpy_img[x, y] = 255
-        self._save_image(self.border_image_name)
+        self._save_image(generate_alias_name(self.image_name, "_border"))
 
     def _interference_line(self):
         """降噪去除干扰线
@@ -314,7 +329,7 @@ class Pretreatment(object):
                     count += 1
                 if count > 2:
                     self.numpy_img[x, y] = 255
-        self._save_image(self.line_image_name)
+        self._save_image(generate_alias_name(self.image_name, "_line"))
 
     def _interference_point(self, x=0, y=0):
         """降噪去除干扰点
@@ -327,7 +342,8 @@ class Pretreatment(object):
         height, width = self.numpy_img.shape[:2]
         # 检查x,y 坐标值是否有效
         if x > height or x < 0 or y > width or y < 0:
-            raise PixelError("({}, {}) beyond ({}, {})".format(x, y, height, width))
+            raise PixelError(
+                "({}, {}) beyond ({}, {})".format(x, y, height, width))
         curr_pixel = self.numpy_img[x, y]  # 当前像素点的值
         for y in range(1, width - 1):
             for x in range(1, height - 1):
@@ -415,7 +431,7 @@ class Pretreatment(object):
                                  + int(self.numpy_img[x + 1, y + 1])
                         if number <= 4 * 245:
                             self.numpy_img[x, y] = 0
-        self._save_image(self.point_image_name)
+        self._save_image(generate_alias_name(self.image_name, "_point"))
 
     def _detect_block_point(self, x_max):
         """搜索区块起点
@@ -478,15 +494,22 @@ class Pretreatment(object):
     def _cut_position_block(self):
         """切割图片中的字符
 
-        字符切割通常用于验证码中有粘连的字符，粘连的字符不好识别，所以我们需要将粘连的字符切割为单个的字符，在进行识别
+        字符切割通常用于验证码中有粘连的字符，粘连的字符不好识别，
+        所以我们需要将粘连的字符切割为单个的字符，在进行识别
 
-    　　字符切割的思路就是找到一个黑色的点，然后在遍历与他相邻的黑色的点，直到遍历完所有的连接起来的黑色的点，
-        找出这些点中的最高的点、最低的点、最右边的点、最左边的点，记录下这四个点，认为这是一个字符，
-        然后在向后遍历点，直至找到黑色的点，继续以上的步骤。最后通过每个字符的四个点进行切割
+    　　字符切割的思路就是找到一个黑色的点，然后在遍历与他相邻的黑色的点，
+        直到遍历完所有的连接起来的黑色的点，
+        找出这些点中的最高的点、最低的点、最右边的点、最左边的点，
+        记录下这四个点，认为这是一个字符，
+        然后在向后遍历点，直至找到黑色的点，继续以上的步骤。
+        最后通过每个字符的四个点进行切割
 
 
         :rtype list, list, list
-        :returns 各区块长度列表 各区块的X轴[起始，终点]列表 各区块的Y轴[起始，终点]列表
+        :returns
+        各区块长度列表
+        各区块的X轴[起始，终点]列表
+        各区块的Y轴[起始，终点]列表
         (
             [14, 13, 14, 14], # 各个字符长度
             [[4, 18], [28, 41], [49, 63], [72, 86]], # 字符 X 轴[起始，终点]位置
@@ -502,7 +525,8 @@ class Pretreatment(object):
 
             try:
                 x_fd, y_fd = self._detect_block_point(x_max)
-                x_max, x_min, y_max, y_min = self._completely_fair_scheduler(x_fd, y_fd)
+                x_max, x_min, y_max, y_min = self._completely_fair_scheduler(
+                    x_fd, y_fd)
                 length = x_max - x_min
                 zone_length.append(length)
                 zone_width.append([x_min, x_max])
@@ -539,12 +563,15 @@ class Pretreatment(object):
             img_position[0][max_length_index] = max_length // 2
             img_position[0].insert(max_length_index + 1, max_length // 2)
             # 设置字符X轴[起始，终点]位置
-            img_position[1][max_length_index][1] = img_position[1][max_length_index][0] + max_length // 2
+            img_position[1][max_length_index][1] = \
+                img_position[1][max_length_index][0] + max_length // 2
             img_position[1].insert(max_length_index + 1,
                                    [img_position[1][max_length_index][1] + 1,
-                                    img_position[1][max_length_index][1] + 1 + max_length // 2])
+                                    img_position[1][max_length_index][
+                                        1] + 1 + max_length // 2])
             # 设置字符的Y轴[起始，终点]位置
-            img_position[2].insert(max_length_index + 1, img_position[2][max_length_index])
+            img_position[2].insert(max_length_index + 1,
+                                   img_position[2][max_length_index])
         return img_position
 
     def _cutting_img(self, x_offset=1, y_offset=1):
@@ -552,11 +579,11 @@ class Pretreatment(object):
 
         切割字符，要想切得好就得配置参数，通常 1 or 2 就可以
 
-                比如 (
-                        [14, 13, 14, 14], # 各个字符长度
-                        [[4, 18], [28, 41], [49, 63], [72, 86]], # 字符 X 轴[起始，终点]位置
-                        [[6, 32], [14, 28], [8, 29], [8, 28]]  # 字符 Y 轴[起始，终点]位置
-                    )
+        比如 (
+            [14, 13, 14, 14], # 各个字符长度
+            [[4, 18], [28, 41], [49, 63], [72, 86]], # 字符 X 轴[起始，终点]位置
+            [[6, 32], [14, 28], [8, 29], [8, 28]]  # 字符 Y 轴[起始，终点]位置
+            )
         :param x_offset: int X 轴偏移位置
         :param y_offset: int Y 轴偏移位置
 
@@ -572,9 +599,11 @@ class Pretreatment(object):
             img_end_x = img_position[1][i][1] + x_offset
             img_start_y = img_position[2][i][0] - y_offset
             img_end_y = img_position[2][i][1] + y_offset
-            cropped = self.numpy_img[img_start_y:img_end_y, img_start_x:img_end_x]
+            cropped = self.numpy_img[
+                      img_start_y:img_end_y, img_start_x:img_end_x]
 
-            new_image_name = generate_alias_name(self.image_path, suffix="cut_{}".format(i))
+            new_image_name = generate_alias_name(self.image_path,
+                                                 suffix="cut_{}".format(i))
             self._save_image(new_image_name, image_obj=cropped)
 
             self.cut_paths.add(new_image_name)
@@ -598,10 +627,13 @@ class Pretreatment(object):
 
 
 def test():
-    test_image_path = "/home/hjd/PycharmProjects/identify-captcha/static/images/test.png"
-    new_test_image_path = "/home/hjd/PycharmProjects/identify-captcha/static/images/test2.png"
+    curr_path = os.path.dirname(os.path.abspath(__file__))
+    static_folder = os.path.join(os.path.dirname(curr_path), "static")
+    image_folder = os.path.join(static_folder, "images")
+    test_image_path = os.path.join(image_folder, "test.png")
+    new_test_image_path = os.path.join(image_folder, "test2.png")
     Pretreatment.get_static_binary_image(test_image_path, new_test_image_path)
-    manager = Pretreatment(new_test_image_path, is_save=True)
+    manager = Pretreatment(test_image_path, is_save=True)
     paths = manager.prepare()
     for image_path in paths:
         text = identify_code(image_path)
