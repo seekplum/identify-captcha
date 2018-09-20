@@ -5,7 +5,7 @@
 ----------------------------------
 项目主页
 ----------------------------------
-https://github.com/seekplum/identify-captcha
+`https://github.com/seekplum/identify-captcha <https://github.com/seekplum/identify-captch>`_
 
 ----------------------------------
 初衷
