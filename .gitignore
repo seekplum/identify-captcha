@@ -115,3 +115,4 @@ docs/build/
 
 # pytest
 tests/.pytest_cache/
+src/.pytest_cache/

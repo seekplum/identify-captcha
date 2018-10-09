@@ -2,7 +2,6 @@
 url = "https://pypi.doubanio.com/simple/"
 verify_ssl = true
 name = "douban"
-
 # [[source]]
 # url = "https://pypi.python.org/simple"
 # verify_ssl = true
@@ -20,6 +19,7 @@ generate-captcha = "==0.0.3"
 tensorflow = "==1.6.0"
 matplotlib = "==2.2.2"
 pytesseract = "==0.2.0"
+opencv-python = "*"
 
 [requires]
 python_version = "2.7"
